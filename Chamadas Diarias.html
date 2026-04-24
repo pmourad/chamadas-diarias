@@ -1,0 +1,1847 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chamadas Diárias</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.1/400.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.1/500.css" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.1/600.css" rel="stylesheet" />
+  <style>
+/* ============ Chamadas Diárias — design tokens ============ */
+:root {
+  --bg: oklch(0.993 0.003 80);
+  --bg-sunk: oklch(0.978 0.004 80);
+  --surface: #ffffff;
+  --line: oklch(0.93 0.005 80);
+  --line-soft: oklch(0.955 0.004 80);
+
+  --ink-1: oklch(0.22 0.01 260);
+  --ink-2: oklch(0.45 0.01 260);
+  --ink-3: oklch(0.62 0.01 260);
+  --ink-4: oklch(0.78 0.008 260);
+
+  --mint-bg:      oklch(0.94 0.055 155);
+  --mint-fg:      oklch(0.42 0.09 155);
+  --mint-dot:     oklch(0.72 0.13 155);
+
+  --lavender-bg: oklch(0.94 0.055 285);
+  --lavender-fg: oklch(0.42 0.12 285);
+  --lavender-dot:oklch(0.68 0.15 285);
+
+  --blush-bg:    oklch(0.94 0.055 15);
+  --blush-fg:    oklch(0.46 0.12 15);
+  --blush-dot:   oklch(0.72 0.15 15);
+
+  --peach-bg:    oklch(0.94 0.055 55);
+  --peach-fg:    oklch(0.48 0.12 55);
+  --peach-dot:   oklch(0.76 0.14 55);
+
+  --sky-bg:      oklch(0.94 0.055 230);
+  --sky-fg:      oklch(0.44 0.11 230);
+  --sky-dot:     oklch(0.7 0.13 230);
+
+  --butter-bg:   oklch(0.95 0.055 95);
+  --butter-fg:   oklch(0.48 0.11 95);
+  --butter-dot:  oklch(0.78 0.13 95);
+
+  --sand-bg:     oklch(0.94 0.02 75);
+  --sand-fg:     oklch(0.42 0.03 75);
+
+  --r-xs: 8px;
+  --r-sm: 10px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+
+  --shadow-card: 0 1px 2px rgba(20, 20, 40, 0.04), 0 8px 24px -12px rgba(20, 20, 40, 0.08);
+  --shadow-pop:  0 2px 4px rgba(20, 20, 40, 0.05), 0 20px 48px -16px rgba(20, 20, 40, 0.18);
+  --shadow-hair: 0 1px 0 rgba(20, 20, 40, 0.02), inset 0 0 0 1px var(--line);
+
+  --font-sans: "Geist", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-sans);
+  color: var(--ink-1);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11";
+  letter-spacing: -0.005em;
+}
+
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea { font-family: inherit; color: inherit; }
+textarea { resize: none; }
+
+.scroll { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.scroll::-webkit-scrollbar { width: 6px; height: 6px; }
+.scroll::-webkit-scrollbar-track { background: transparent; }
+.scroll::-webkit-scrollbar-thumb { background: var(--line); border-radius: 99px; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+.chip-sm { padding: 3px 8px; font-size: 11px; }
+
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+.squircle-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: var(--bg-sunk);
+  border: 1px solid var(--line-soft);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-3);
+  flex-shrink: 0;
+}
+.squircle-icon svg { width: 16px; height: 16px; }
+
+.inline-edit {
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  transition: all 140ms ease;
+  width: 100%;
+  outline: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+}
+.inline-edit:hover {
+  background: var(--bg-sunk);
+  border-color: var(--line-soft);
+}
+.inline-edit:focus {
+  background: #fff;
+  border-color: var(--sky-dot);
+  box-shadow: 0 0 0 3px oklch(0.94 0.055 230 / 0.6);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 140ms ease;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--ink-1);
+}
+.btn:hover { background: var(--bg-sunk); }
+.btn-primary {
+  background: var(--ink-1);
+  color: #fff;
+  border-color: var(--ink-1);
+}
+.btn-primary:hover { background: oklch(0.3 0.01 260); }
+.btn-ghost {
+  border-color: transparent;
+  color: var(--ink-2);
+}
+.btn-ghost:hover { background: var(--bg-sunk); color: var(--ink-1); }
+
+.outcome {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 14px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1;
+  transition: all 160ms ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.outcome .emoji { font-size: 14px; }
+.outcome:hover { transform: translateY(-1px); }
+.outcome.active { box-shadow: 0 0 0 2px currentColor; }
+
+.tint-mint     { background: var(--mint-bg);     color: var(--mint-fg); }
+.tint-lavender { background: var(--lavender-bg); color: var(--lavender-fg); }
+.tint-blush    { background: var(--blush-bg);    color: var(--blush-fg); }
+.tint-peach    { background: var(--peach-bg);    color: var(--peach-fg); }
+.tint-sky      { background: var(--sky-bg);      color: var(--sky-fg); }
+.tint-butter   { background: var(--butter-bg);   color: var(--butter-fg); }
+.tint-sand     { background: var(--sand-bg);     color: var(--sand-fg); }
+
+.tint-subtle-mint     { background: color-mix(in oklab, var(--mint-bg) 40%, #fff); color: var(--mint-fg); }
+.tint-subtle-lavender { background: color-mix(in oklab, var(--lavender-bg) 40%, #fff); color: var(--lavender-fg); }
+.tint-subtle-blush    { background: color-mix(in oklab, var(--blush-bg) 40%, #fff); color: var(--blush-fg); }
+.tint-subtle-peach    { background: color-mix(in oklab, var(--peach-bg) 40%, #fff); color: var(--peach-fg); }
+.tint-subtle-sky      { background: color-mix(in oklab, var(--sky-bg) 40%, #fff); color: var(--sky-fg); }
+.tint-subtle-butter   { background: color-mix(in oklab, var(--butter-bg) 40%, #fff); color: var(--butter-fg); }
+.tint-subtle-sand     { background: color-mix(in oklab, var(--sand-bg) 40%, #fff); color: var(--sand-fg); }
+
+.modal-backdrop {
+  position: fixed; inset: 0;
+  background: oklch(0.22 0.01 260 / 0.32);
+  backdrop-filter: blur(4px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 160ms ease;
+}
+.modal {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: var(--shadow-pop);
+  padding: 28px;
+  min-width: 440px;
+  max-width: 520px;
+  animation: modalIn 200ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.card {
+  background: #fff;
+  border-radius: 20px;
+  border: 1px solid var(--line-soft);
+  box-shadow: var(--shadow-card);
+  position: relative;
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+.card:hover { box-shadow: 0 2px 3px rgba(20,20,40,0.05), 0 16px 40px -18px rgba(20,20,40,0.14); }
+
+.reminder-pill {
+  position: absolute;
+  top: -16px;
+  left: 32px;
+  background: var(--peach-bg);
+  border: 1.5px solid var(--peach-dot);
+  padding: 7px 14px 7px 10px;
+  border-radius: 99px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--peach-fg);
+  box-shadow: 0 2px 8px -2px oklch(0.76 0.14 55 / 0.35);
+  z-index: 2;
+}
+
+.status-badge {
+  position: absolute;
+  top: -14px;
+  right: 24px;
+  z-index: 2;
+}
+
+.divider-v { width: 1px; background: var(--line-soft); align-self: stretch; }
+.divider-h { height: 1px; background: var(--line-soft); }
+
+.tweaks {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 320px;
+  max-height: calc(100vh - 48px);
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: var(--shadow-pop);
+  border: 1px solid var(--line-soft);
+  z-index: 80;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.tweaks-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tweaks-body {
+  padding: 16px 20px 20px;
+  overflow-y: auto;
+}
+.tweaks-section { margin-bottom: 18px; }
+.tweaks-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-3);
+  margin-bottom: 8px;
+}
+.tweak-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.tweak-opt {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg-sunk);
+  border: 1px solid transparent;
+  color: var(--ink-2);
+  transition: all 140ms ease;
+}
+.tweak-opt:hover { background: #fff; border-color: var(--line); }
+.tweak-opt.active { background: var(--ink-1); color: #fff; }
+
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px oklch(0.94 0.055 230 / 0.6);
+}
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+  <!-- icons -->
+  <script type="text/babel">
+const Icon = ({ name, size = 16, ...props }) => {
+  const paths = {
+    phone: <path d="M5 4h3l1.5 4L7 10a10 10 0 004.5 4.5L13 12l4 1.5V17a2 2 0 01-2.3 2A16 16 0 013 7.3 2 2 0 015 4z" />,
+    id: <><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="M14 10h4M14 13h3M5 16h12" /></>,
+    user: <><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1-3.5 4-5.5 7-5.5s6 2 7 5.5"/></>,
+    link: <><path d="M10 14a4 4 0 005.7 0l3-3a4 4 0 10-5.7-5.7L12 6.5"/><path d="M14 10a4 4 0 00-5.7 0l-3 3a4 4 0 105.7 5.7L12 17.5"/></>,
+    externalLink: <><path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></>,
+    platform: <><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M3 9h18"/><circle cx="6" cy="6.5" r="0.5" fill="currentColor"/></>,
+    bell: <path d="M6 15V10a6 6 0 1112 0v5l1.5 2h-15L6 15zM10 20a2 2 0 004 0" />,
+    plus: <><path d="M12 5v14M5 12h14"/></>,
+    close: <><path d="M6 6l12 12M18 6L6 18"/></>,
+    export: <><path d="M12 3v12m0 0l-4-4m4 4l4-4"/><path d="M5 17v2a2 2 0 002 2h10a2 2 0 002-2v-2"/></>,
+    import: <><path d="M12 21V9m0 0l-4 4m4-4l4 4"/><path d="M5 5v2h14V5"/></>,
+    search: <><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.5-4.5"/></>,
+    filter: <path d="M4 5h16M7 12h10M10 19h4" />,
+    edit: <><path d="M4 20h4l10-10-4-4L4 16v4z"/><path d="M14 6l4 4"/></>,
+    check: <path d="M5 12l5 5 9-11" />,
+    clock: <><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></>,
+    chevronDown: <path d="M6 9l6 6 6-6" />,
+    chevronUp: <path d="M18 15l-6-6-6 6" />,
+    chevronRight: <path d="M9 6l6 6-6 6" />,
+    trash: <><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/></>,
+    note: <><path d="M5 4h10l4 4v12H5z"/><path d="M14 4v5h5M9 14h6M9 17h4"/></>,
+    calendar: <><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></>,
+    more: <><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></>,
+    sparkle: <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>,
+    home: <><path d="M4 11l8-7 8 7v9a1 1 0 01-1 1h-4v-6h-6v6H5a1 1 0 01-1-1v-9z"/></>,
+    sun: <><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4L7 17M17 7l1.4-1.4"/></>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      {paths[name]}
+    </svg>
+  );
+};
+window.Icon = Icon;
+  </script>
+
+  <!-- data -->
+  <script type="text/babel">
+const OUTCOMES = [
+  { id: "atendeu",         emoji: "✅", label: "Atendeu",           tint: "mint",     dot: "var(--mint-dot)",     reminder: false },
+  { id: "nao_atendeu",     emoji: "📵", label: "Não atendeu",       tint: "peach",    dot: "var(--peach-dot)",    reminder: true  },
+  { id: "ocupado",         emoji: "📞", label: "Ocupado",           tint: "butter",   dot: "var(--butter-dot)",   reminder: true  },
+  { id: "numero_errado",   emoji: "❌", label: "Nº errado",         tint: "blush",    dot: "var(--blush-dot)",    reminder: false },
+  { id: "sms",             emoji: "💬", label: "SMS",               tint: "sky",      dot: "var(--sky-dot)",      reminder: false },
+  { id: "ja_vendido",      emoji: "🏁", label: "Já vendido",        tint: "sand",     dot: "oklch(0.6 0.02 75)",  reminder: false },
+  { id: "nao_interessado", emoji: "🚫", label: "Não interessado",   tint: "blush",    dot: "var(--blush-dot)",    reminder: false },
+  { id: "interessado",     emoji: "🌟", label: "Interessado",       tint: "lavender", dot: "var(--lavender-dot)", reminder: true  },
+];
+const OUTCOMES_BY_ID = Object.fromEntries(OUTCOMES.map(o => [o.id, o]));
+
+const STATUS_SIMPLE = [
+  { id: "pendente",   label: "Pendente",   tint: "sand" },
+  { id: "em_curso",   label: "Em curso",   tint: "sky" },
+  { id: "concluido",  label: "Concluído",  tint: "mint" },
+];
+const STATUS_EXTENDED = [
+  { id: "pendente",     label: "Pendente",     tint: "sand" },
+  { id: "a_aguardar",   label: "A aguardar",   tint: "butter" },
+  { id: "interessado",  label: "Interessado",  tint: "lavender" },
+  { id: "concluido",    label: "Concluído",    tint: "mint" },
+  { id: "arquivado",    label: "Arquivado",    tint: "sand" },
+];
+
+const PLATFORMS = [
+  { id: "casasapo",       label: "Casasapo",       tint: "peach" },
+  { id: "contato_direto", label: "Contato direto",  tint: "mint" },
+  { id: "facebook",       label: "Facebook",        tint: "sky" },
+  { id: "idealista",      label: "Idealista",       tint: "lavender" },
+  { id: "imojoy",         label: "Imojoy",          tint: "butter" },
+  { id: "imovirtual",     label: "Imovirtual",      tint: "sky" },
+  { id: "internet",       label: "Internet",        tint: "sand" },
+  { id: "olx",            label: "Olx",             tint: "blush" },
+  { id: "placa",          label: "Placa",           tint: "sand" },
+  { id: "remax",          label: "Remax",           tint: "blush" },
+  { id: "referencia",     label: "Referencia",      tint: "mint" },
+  { id: "outro",          label: "Outro",           tint: "sand" },
+];
+
+const REMINDER_OPTIONS = [
+  { id: "5m",  label: "5 min",     ms: 5 * 60_000 },
+  { id: "10m", label: "10 min",    ms: 10 * 60_000 },
+  { id: "15m", label: "15 min",    ms: 15 * 60_000 },
+  { id: "30m", label: "30 min",    ms: 30 * 60_000 },
+  { id: "1h",  label: "1 hora",    ms: 60 * 60_000 },
+  { id: "3h",  label: "3 horas",   ms: 3 * 60 * 60_000 },
+  { id: "1d",  label: "Amanhã",    ms: 24 * 60 * 60_000 },
+];
+
+const SEED_CARDS = [
+  {
+    id: "c1",
+    ref: "",
+    seller: "Maria Gonçalves",
+    phone: "+351 912 483 217",
+    platform: "idealista",
+    listingUrl: "https://idealista.pt/imovel/34821",
+    listingTitle: "T2 em Alfama, Lisboa — 285.000€",
+    notes: "Imóvel bem localizado, perto do castelo. Proprietária disponível depois das 14h.",
+    history: [
+      { ts: Date.now() - 3 * 86400_000, outcome: "nao_atendeu" },
+      { ts: Date.now() - 86400_000 - 3600_000, outcome: "atendeu" },
+    ],
+    status: "interessado",
+    reminder: { at: Date.now() + 12 * 60_000, label: "Ligar em 15 min" },
+    createdAt: Date.now() - 4 * 86400_000,
+  },
+  {
+    id: "c2",
+    ref: "",
+    seller: "João Pereira Santos",
+    phone: "+351 934 712 099",
+    platform: "imovirtual",
+    listingUrl: "https://imovirtual.com/anuncio/7812",
+    listingTitle: "T3 em Campo de Ourique — 420.000€",
+    notes: "",
+    history: [],
+    status: "pendente",
+    reminder: null,
+    createdAt: Date.now() - 2 * 86400_000,
+  },
+  {
+    id: "c3",
+    ref: "",
+    seller: "Ana Rita Ferreira",
+    phone: "+351 965 002 841",
+    platform: "casasapo",
+    listingUrl: "https://casa.sapo.pt/145812",
+    listingTitle: "Moradia V4 em Cascais — 795.000€",
+    notes: "Dona é herdeira, precisa de vender rápido. Mandou documentos por email.",
+    history: [
+      { ts: Date.now() - 2 * 3600_000, outcome: "atendeu" },
+    ],
+    status: "concluido",
+    reminder: null,
+    createdAt: Date.now() - 86400_000,
+  },
+  {
+    id: "c4",
+    ref: "",
+    seller: "Carlos Henrique Dias",
+    phone: "+351 917 334 512",
+    platform: "olx",
+    listingUrl: "https://olx.pt/d/anuncio/4-9921",
+    listingTitle: "T1 em Benfica — 180.000€",
+    notes: "",
+    history: [
+      { ts: Date.now() - 30 * 60_000, outcome: "ocupado" },
+    ],
+    status: "a_aguardar",
+    reminder: { at: Date.now() + 25 * 60_000, label: "Ligar em 30 min" },
+    createdAt: Date.now() - 3 * 3600_000,
+  },
+  {
+    id: "c5",
+    ref: "",
+    seller: "Teresa Marques",
+    phone: "+351 919 812 447",
+    platform: "idealista",
+    listingUrl: "https://idealista.pt/imovel/34829",
+    listingTitle: "T2 em Oeiras, vista rio — 365.000€",
+    notes: "Já comprou casa nova. Quer vender até ao fim do mês.",
+    history: [
+      { ts: Date.now() - 5 * 86400_000, outcome: "atendeu" },
+      { ts: Date.now() - 4 * 86400_000, outcome: "sms" },
+      { ts: Date.now() - 2 * 86400_000, outcome: "atendeu" },
+    ],
+    status: "em_curso",
+    reminder: null,
+    createdAt: Date.now() - 6 * 86400_000,
+  },
+];
+
+const STORAGE_KEY = "chamadas-diarias-v1";
+
+// Supabase client
+const _sb = supabase.createClient(
+  "https://ynyuoupgmjtqmxhapzho.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlueXVvdXBnbWp0cW14aGFwemhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzcwMjI3MzksImV4cCI6MjA5MjU5ODczOX0.xaBFHlOW3Jx4QG5XkcqDOitS9OglF5TlbjRe_zXAMuQ"
+);
+window._sb = _sb;
+
+// localStorage backup (silent fallback if Supabase is unreachable)
+function _lsSave(state) {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+}
+function _lsLoad() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch (e) {}
+  return null;
+}
+
+async function loadState() {
+  try {
+    const { data, error } = await _sb
+      .from("chamadas_state")
+      .select("data")
+      .eq("id", 1)
+      .single();
+    if (error) throw error;
+    if (data?.data?.cards?.length) return data.data;
+  } catch (e) {
+    console.warn("Supabase load failed, falling back to localStorage", e);
+  }
+  return _lsLoad() || { cards: SEED_CARDS };
+}
+
+async function saveState(state) {
+  _lsSave(state);
+  try {
+    await _sb.from("chamadas_state").upsert({
+      id: 1,
+      data: state,
+      updated_at: new Date().toISOString(),
+    });
+  } catch (e) {
+    console.warn("Supabase save failed", e);
+  }
+}
+
+function formatTime(ts) {
+  const d = new Date(ts);
+  return d.toLocaleTimeString("pt-PT", { hour: "2-digit", minute: "2-digit" });
+}
+function formatDateTime(ts) {
+  const d = new Date(ts);
+  const now = new Date();
+  const sameDay = d.toDateString() === now.toDateString();
+  const yest = new Date(now.getTime() - 86400_000);
+  const isYest = d.toDateString() === yest.toDateString();
+  const time = formatTime(ts);
+  if (sameDay) return `Hoje, ${time}`;
+  if (isYest) return `Ontem, ${time}`;
+  return d.toLocaleDateString("pt-PT", { day: "2-digit", month: "short" }) + `, ${time}`;
+}
+function formatRelative(ts) {
+  const diff = ts - Date.now();
+  const abs = Math.abs(diff);
+  const min = Math.round(abs / 60_000);
+  if (min < 1) return diff >= 0 ? "agora" : "agora mesmo";
+  if (min < 60) return diff >= 0 ? `em ${min} min` : `há ${min} min`;
+  const h = Math.round(min / 60);
+  if (h < 24) return diff >= 0 ? `em ${h}h` : `há ${h}h`;
+  const d = Math.round(h / 24);
+  return diff >= 0 ? `em ${d}d` : `há ${d}d`;
+}
+function formatFullDatePT() {
+  const d = new Date();
+  const days = ["Domingo","Segunda","Terça","Quarta","Quinta","Sexta","Sábado"];
+  const months = ["janeiro","fevereiro","março","abril","maio","junho","julho","agosto","setembro","outubro","novembro","dezembro"];
+  return `${days[d.getDay()]}, ${d.getDate()} de ${months[d.getMonth()]}`;
+}
+
+window.OUTCOMES = OUTCOMES;
+window.OUTCOMES_BY_ID = OUTCOMES_BY_ID;
+window.STATUS_SIMPLE = STATUS_SIMPLE;
+window.STATUS_EXTENDED = STATUS_EXTENDED;
+window.PLATFORMS = PLATFORMS;
+window.REMINDER_OPTIONS = REMINDER_OPTIONS;
+window.SEED_CARDS = SEED_CARDS;
+window.loadState = loadState;
+window.saveState = saveState;
+window.STORAGE_KEY = STORAGE_KEY;
+window.formatTime = formatTime;
+window.formatDateTime = formatDateTime;
+window.formatRelative = formatRelative;
+window.formatFullDatePT = formatFullDatePT;
+  </script>
+
+  <!-- card -->
+  <script type="text/babel">
+const { useState, useEffect, useRef, useMemo } = React;
+
+function InlineEdit({ value, onChange, placeholder, style, as = "input", ...props }) {
+  const Tag = as;
+  return (
+    <Tag
+      className="inline-edit"
+      value={value || ""}
+      placeholder={placeholder}
+      onChange={(e) => onChange(e.target.value)}
+      style={style}
+      {...props}
+    />
+  );
+}
+
+function StatusBadge({ status, statusSet }) {
+  if (!status) return null;
+  const set = statusSet === "extended" ? window.STATUS_EXTENDED : statusSet === "outcomes" ? window.OUTCOMES : window.STATUS_SIMPLE;
+  const s = set.find(x => x.id === status);
+  if (!s) return null;
+  const dotVar = s.tint === "sand" ? "oklch(0.6 0.02 75)" : `var(--${s.tint}-dot)`;
+  return (
+    <div
+      className={`tint-${s.tint}`}
+      style={{
+        display: "inline-flex", alignItems: "center", gap: 7,
+        padding: "7px 14px",
+        borderRadius: 99,
+        fontSize: 12, fontWeight: 700,
+        letterSpacing: "0.02em",
+        boxShadow: `0 0 0 2px color-mix(in oklab, var(--${s.tint}-bg) 60%, transparent)`,
+      }}
+    >
+      <span className="dot" style={{ background: dotVar, width: 8, height: 8 }} />
+      {s.label}
+    </div>
+  );
+}
+
+function OutcomeButton({ outcome, variant, active, onClick }) {
+  if (variant === "white") {
+    return (
+      <button
+        className={`outcome ${active ? "active" : ""}`}
+        onClick={onClick}
+        style={{
+          background: active ? `var(--${outcome.tint}-bg)` : "#fff",
+          color: active ? `var(--${outcome.tint}-fg)` : "var(--ink-2)",
+          border: `1px solid ${active ? "transparent" : "var(--line)"}`,
+        }}
+      >
+        <span className="emoji">{outcome.emoji}</span>
+        <span>{outcome.label}</span>
+      </button>
+    );
+  }
+  if (variant === "icon") {
+    return (
+      <button
+        className={`outcome tint-${outcome.tint} ${active ? "active" : ""}`}
+        onClick={onClick}
+        title={outcome.label}
+        style={{ padding: "10px", fontSize: 16 }}
+      >
+        <span className="emoji">{outcome.emoji}</span>
+      </button>
+    );
+  }
+  return (
+    <button
+      className={`outcome tint-${outcome.tint} ${active ? "active" : ""}`}
+      onClick={onClick}
+    >
+      <span className="emoji">{outcome.emoji}</span>
+      <span>{outcome.label}</span>
+    </button>
+  );
+}
+
+function FieldRow({ icon, label, children }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+      <div className="squircle-icon" style={{ width: 28, height: 28, borderRadius: 8 }}>
+        <Icon name={icon} size={14} />
+      </div>
+      <div style={{ minWidth: 70, fontSize: 12, color: "var(--ink-3)", fontWeight: 500 }}>{label}</div>
+      <div style={{ flex: 1, minWidth: 0 }}>{children}</div>
+    </div>
+  );
+}
+
+function CallCard({
+  card,
+  onUpdate,
+  onDelete,
+  onRegisterCall,
+  onRequestReminder,
+  density = "airy",
+  outcomeVariant = "pastel",
+  statusSet = "outcomes",
+  collapsed = false,
+  onToggleCollapse,
+}) {
+  const [pendingOutcome, setPendingOutcome] = useState(false);
+  const [now, setNow] = useState(Date.now());
+
+  useEffect(() => {
+    const iv = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(iv);
+  }, []);
+
+  const lastOutcome = card.history.length > 0 ? card.history[card.history.length - 1].outcome : null;
+  const lastOutcomeObj = lastOutcome ? window.OUTCOMES_BY_ID[lastOutcome] : null;
+  const platform = window.PLATFORMS.find(p => p.id === card.platform);
+
+  const pad = density === "compact" ? 20 : density === "balanced" ? 28 : 36;
+
+  const handleOutcome = (outcome) => {
+    const history = [...card.history, { ts: Date.now(), outcome: outcome.id }];
+    onUpdate({ ...card, history });
+    setPendingOutcome(false);
+    if (outcome.reminder) {
+      onRequestReminder(card.id, outcome);
+    }
+  };
+
+  const handleRegister = () => {
+    onRegisterCall(card.id);
+    setPendingOutcome(true);
+  };
+
+  const reminderActive = card.reminder && card.reminder.at;
+  const isInteressado = card.status === "interessado" || lastOutcome === "interessado";
+
+  if (collapsed) {
+    return (
+      <div className="card" style={{ padding: "18px 24px", display: "flex", alignItems: "center", gap: 20 }}>
+        <StatusBadge status={card.status} statusSet={statusSet} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 15, fontWeight: 600 }}>{card.seller}</div>
+          <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 2 }}>{card.ref} · {card.phone}</div>
+        </div>
+        {lastOutcomeObj && (
+          <div className={`chip tint-subtle-${lastOutcomeObj.tint}`}>
+            <span>{lastOutcomeObj.emoji}</span>
+            <span>{lastOutcomeObj.label}</span>
+          </div>
+        )}
+        <button className="btn btn-ghost" onClick={onToggleCollapse}>
+          <Icon name="chevronDown" />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="card" style={{
+      padding: 0,
+      overflow: "visible",
+      ...(isInteressado && {
+        border: "2px solid oklch(0.78 0.14 85)",
+        boxShadow: "var(--shadow-card), 0 0 0 4px oklch(0.78 0.14 85 / 0.12)",
+      }),
+    }}>
+      {isInteressado && (
+        <div style={{
+          position: "absolute",
+          top: -8,
+          right: -11,
+          fontSize: 22,
+          lineHeight: 1,
+          zIndex: 3,
+          filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.15))",
+        }}>⭐️</div>
+      )}
+      {reminderActive && (
+        <div className="reminder-pill">
+          <span className="dot" style={{ background: "var(--peach-dot)" }} />
+          <Icon name="bell" size={13} />
+          <span>{window.formatRelative(card.reminder.at)}</span>
+          <span style={{ color: "var(--ink-4)" }}>·</span>
+          <span style={{ color: "var(--ink-3)" }}>{card.reminder.label}</span>
+          <button
+            onClick={() => onUpdate({ ...card, reminder: null })}
+            style={{ display: "flex", marginLeft: 4, color: "var(--ink-4)" }}
+            title="Cancelar lembrete"
+          >
+            <Icon name="close" size={12} />
+          </button>
+        </div>
+      )}
+
+      <div className="status-badge">
+        <StatusBadge status={card.status || lastOutcome} statusSet={statusSet} />
+      </div>
+
+      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 1px minmax(0, 1.4fr)", minHeight: 280 }}>
+        {/* LEFT PANEL */}
+        <div style={{ padding: `${pad}px`, display: "flex", flexDirection: "column", gap: density === "compact" ? 14 : 18 }}>
+          <div style={{ paddingRight: 90, display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em" }}>
+              {card.createdAt ? window.formatDateTime(card.createdAt) : ""}
+            </div>
+            <InlineEdit
+              value={card.seller}
+              onChange={(v) => onUpdate({ ...card, seller: v })}
+              placeholder="Nome do vendedor"
+              style={{ fontSize: 22, fontWeight: 600, lineHeight: 1.2, letterSpacing: "-0.02em" }}
+            />
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 4 }}>
+            <FieldRow icon="id" label="Ref/ID">
+              <InlineEdit
+                value={card.ref}
+                onChange={(v) => onUpdate({ ...card, ref: v })}
+                placeholder="Ex: REF-1234"
+                style={{ fontSize: 13, fontWeight: 500 }}
+              />
+            </FieldRow>
+
+            <FieldRow icon="phone" label="Telefone">
+              <InlineEdit
+                value={card.phone}
+                onChange={(v) => onUpdate({ ...card, phone: v })}
+                placeholder="+351 …"
+                style={{ fontSize: 15, fontWeight: 500, fontVariantNumeric: "tabular-nums" }}
+              />
+            </FieldRow>
+
+            <FieldRow icon="platform" label="Plataforma">
+              <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "2px 0" }}>
+                <select
+                  value={card.platform}
+                  onChange={(e) => onUpdate({ ...card, platform: e.target.value })}
+                  style={{
+                    appearance: "none",
+                    border: "none",
+                    background: "transparent",
+                    fontSize: 13,
+                    fontWeight: 500,
+                    padding: 0,
+                    cursor: "pointer",
+                    outline: "none",
+                    color: "var(--ink-1)",
+                  }}
+                >
+                  {window.PLATFORMS.map(p => (
+                    <option key={p.id} value={p.id}>{p.label}</option>
+                  ))}
+                </select>
+                <span className={`chip chip-sm tint-subtle-${platform?.tint || "sand"}`}>
+                  {platform?.label}
+                </span>
+              </div>
+            </FieldRow>
+
+            <FieldRow icon="link" label="Anúncio">
+              <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                <InlineEdit
+                  value={card.listingUrl}
+                  onChange={(v) => onUpdate({ ...card, listingUrl: v })}
+                  placeholder="https://…"
+                  style={{ fontSize: 13 }}
+                />
+                {card.listingUrl && (
+                  <a
+                    href={card.listingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{ display: "flex", flexShrink: 0, color: "var(--sky-fg)" }}
+                    title="Abrir anúncio"
+                  >
+                    <Icon name="externalLink" size={14} />
+                  </a>
+                )}
+              </div>
+            </FieldRow>
+          </div>
+
+          <div style={{ marginTop: "auto", display: "flex", flexDirection: "column", gap: 10 }}>
+            {card.listingTitle && (
+              <div style={{
+                padding: "12px 14px",
+                background: "var(--bg-sunk)",
+                borderRadius: 12,
+                fontSize: 12,
+                color: "var(--ink-2)",
+                lineHeight: 1.45,
+              }}>
+                <div style={{ fontSize: 10, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
+                  Imóvel
+                </div>
+                {card.listingTitle}
+              </div>
+            )}
+            <div>
+              <button
+                className="btn btn-ghost"
+                onClick={() => onDelete && onDelete(card.id)}
+                title="Eliminar ficha"
+                style={{ padding: "6px 8px", color: "var(--ink-4)", gap: 6, fontSize: 12 }}
+              >
+                <Icon name="trash" size={14} />
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="divider-v" />
+
+        {/* RIGHT PANEL */}
+        <div style={{ padding: `${pad}px`, display: "flex", flexDirection: "column", gap: density === "compact" ? 14 : 18 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            <button
+              className="btn btn-primary"
+              onClick={handleRegister}
+              style={{ flex: 1, justifyContent: "center", padding: density === "compact" ? "12px 20px" : "14px 22px", fontSize: 15, borderRadius: 14 }}
+            >
+              <Icon name="phone" size={17} />
+              Registar chamada
+            </button>
+            <button
+              className="btn btn-ghost"
+              onClick={onToggleCollapse}
+              title="Colapsar"
+              style={{ padding: 10 }}
+            >
+              <Icon name="chevronUp" size={16} />
+            </button>
+          </div>
+
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10, display: "flex", alignItems: "center", gap: 8 }}>
+              Resultado
+              {pendingOutcome && (
+                <span className="chip chip-sm tint-subtle-butter">
+                  <span className="dot" style={{ background: "var(--butter-dot)" }} />
+                  a aguardar
+                </span>
+              )}
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+              {window.OUTCOMES.map((o) => (
+                <OutcomeButton
+                  key={o.id}
+                  outcome={o}
+                  variant={outcomeVariant}
+                  active={lastOutcome === o.id}
+                  onClick={() => handleOutcome(o)}
+                />
+              ))}
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 4, minHeight: 120 }}>
+            <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Notas</div>
+              <textarea
+                className="inline-edit scroll"
+                value={card.notes}
+                onChange={(e) => onUpdate({ ...card, notes: e.target.value })}
+                placeholder="Anotar detalhes da chamada…"
+                style={{
+                  flex: 1,
+                  padding: "10px 12px",
+                  borderRadius: 10,
+                  background: "var(--bg-sunk)",
+                  border: "1px solid transparent",
+                  fontSize: 13,
+                  lineHeight: 1.5,
+                  minHeight: 100,
+                  margin: 0,
+                  width: "100%",
+                }}
+              />
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8, display: "flex", justifyContent: "space-between" }}>
+                <span>Histórico</span>
+                <span style={{ color: "var(--ink-4)" }}>{card.history.length}</span>
+              </div>
+              <div className="scroll" style={{
+                flex: 1,
+                background: "var(--bg-sunk)",
+                borderRadius: 10,
+                padding: 10,
+                minHeight: 100,
+                maxHeight: 140,
+                overflowY: "auto",
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+              }}>
+                {card.history.length === 0 ? (
+                  <div style={{ fontSize: 12, color: "var(--ink-4)", textAlign: "center", margin: "auto", padding: 8 }}>
+                    Sem chamadas registadas
+                  </div>
+                ) : (
+                  [...card.history].reverse().map((h, i) => {
+                    const o = window.OUTCOMES_BY_ID[h.outcome];
+                    return (
+                      <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, padding: "4px 2px" }}>
+                        <span style={{ fontSize: 14, width: 18, textAlign: "center" }}>{o?.emoji || "·"}</span>
+                        <span style={{ flex: 1, color: "var(--ink-2)", fontWeight: 500 }}>{o?.label || h.outcome}</span>
+                        <span style={{ color: "var(--ink-4)", fontVariantNumeric: "tabular-nums" }}>{window.formatDateTime(h.ts)}</span>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+window.CallCard = CallCard;
+window.StatusBadge = StatusBadge;
+window.OutcomeButton = OutcomeButton;
+window.FieldRow = FieldRow;
+window.InlineEdit = InlineEdit;
+  </script>
+
+  <!-- modal -->
+  <script type="text/babel">
+function ReminderModal({ outcome, onConfirm, onClose }) {
+  const [customDate, setCustomDate] = useState("");
+  const [customTime, setCustomTime] = useState("");
+  const [showCustom, setShowCustom] = useState(false);
+
+  const handleQuick = (opt) => {
+    const at = Date.now() + opt.ms;
+    onConfirm({ at, label: `${outcome.emoji} ${outcome.label} · ${opt.label}` });
+  };
+
+  const handleCustom = () => {
+    if (!customDate || !customTime) return;
+    const at = new Date(`${customDate}T${customTime}`).getTime();
+    if (isNaN(at)) return;
+    onConfirm({ at, label: `${outcome.emoji} ${outcome.label}` });
+  };
+
+  return (
+    <div className="modal-backdrop" onClick={onClose}>
+      <div className="modal" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div className={`squircle-icon tint-${outcome.tint}`} style={{ width: 44, height: 44, borderRadius: 14, border: "none" }}>
+              <span style={{ fontSize: 20 }}>{outcome.emoji}</span>
+            </div>
+            <div>
+              <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.01em" }}>Definir lembrete</div>
+              <div style={{ fontSize: 13, color: "var(--ink-3)", marginTop: 2 }}>
+                Marcado como <strong style={{ color: "var(--ink-2)" }}>{outcome.label}</strong>. Quando ligar de novo?
+              </div>
+            </div>
+          </div>
+          <button className="btn btn-ghost" onClick={onClose} style={{ padding: 8 }}>
+            <Icon name="close" />
+          </button>
+        </div>
+
+        <div style={{ marginTop: 24, display: "flex", flexWrap: "wrap", gap: 8 }}>
+          {window.REMINDER_OPTIONS.map(opt => (
+            <button
+              key={opt.id}
+              className="outcome tint-subtle-sky"
+              onClick={() => handleQuick(opt)}
+              style={{ flex: "1 1 auto", minWidth: 80, justifyContent: "center", padding: "12px 14px", fontSize: 13 }}
+            >
+              <Icon name="clock" size={14} />
+              <span>{opt.label}</span>
+            </button>
+          ))}
+          <button
+            className="outcome tint-subtle-lavender"
+            onClick={() => setShowCustom(s => !s)}
+            style={{ flex: "1 1 auto", minWidth: 80, justifyContent: "center", padding: "12px 14px", fontSize: 13 }}
+          >
+            <Icon name="calendar" size={14} />
+            <span>Personalizado</span>
+          </button>
+        </div>
+
+        {showCustom && (
+          <div style={{ marginTop: 16, padding: 14, background: "var(--bg-sunk)", borderRadius: 12, display: "flex", gap: 10, alignItems: "center" }}>
+            <input
+              type="date"
+              value={customDate}
+              onChange={(e) => setCustomDate(e.target.value)}
+              style={{ flex: 1, padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 8, fontSize: 13, background: "#fff" }}
+            />
+            <input
+              type="time"
+              value={customTime}
+              onChange={(e) => setCustomTime(e.target.value)}
+              style={{ padding: "8px 10px", border: "1px solid var(--line)", borderRadius: 8, fontSize: 13, background: "#fff" }}
+            />
+            <button className="btn btn-primary" onClick={handleCustom} style={{ padding: "8px 14px", fontSize: 13 }}>
+              OK
+            </button>
+          </div>
+        )}
+
+        <div style={{ marginTop: 20, paddingTop: 16, borderTop: "1px solid var(--line-soft)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <button className="btn btn-ghost" onClick={() => onConfirm(null)} style={{ fontSize: 13, color: "var(--ink-3)" }}>
+            Sem lembrete
+          </button>
+          <div style={{ fontSize: 12, color: "var(--ink-4)" }}>
+            Os dados ficam no navegador
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+window.ReminderModal = ReminderModal;
+
+// ============ Reminder Alert Modal (fires when reminder time is reached) ============
+function ReminderAlertModal({ card, onDismiss, onSnooze }) {
+  const platform = window.PLATFORMS.find(p => p.id === card.platform);
+  const snoozeOptions = [
+    { label: "5 min",  ms: 5 * 60_000 },
+    { label: "15 min", ms: 15 * 60_000 },
+    { label: "1 hora", ms: 60 * 60_000 },
+  ];
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal" style={{ textAlign: "center", maxWidth: 440 }} onClick={e => e.stopPropagation()}>
+        <div style={{ fontSize: 44, marginBottom: 8, lineHeight: 1 }}>🔔</div>
+        <div style={{ fontSize: 20, fontWeight: 700, letterSpacing: "-0.01em", marginBottom: 4 }}>Lembrete!</div>
+        {card.reminder?.label && (
+          <div style={{ fontSize: 13, color: "var(--ink-3)", marginBottom: 20 }}>{card.reminder.label}</div>
+        )}
+
+        <div style={{ padding: "16px", background: "var(--bg-sunk)", borderRadius: 14, marginBottom: 20 }}>
+          <div style={{ fontSize: 18, fontWeight: 600 }}>{card.seller || "—"}</div>
+          <div style={{ fontSize: 15, color: "var(--ink-2)", marginTop: 4, fontVariantNumeric: "tabular-nums" }}>{card.phone}</div>
+          {platform && (
+            <span className={`chip chip-sm tint-subtle-${platform.tint}`} style={{ marginTop: 8 }}>
+              {platform.label}
+            </span>
+          )}
+          {card.listingTitle && (
+            <div style={{ marginTop: 10, fontSize: 12, color: "var(--ink-3)", lineHeight: 1.4 }}>{card.listingTitle}</div>
+          )}
+        </div>
+
+        <div style={{ display: "flex", gap: 8, justifyContent: "center", flexWrap: "wrap", marginBottom: 12 }}>
+          {snoozeOptions.map(s => (
+            <button key={s.label} className="btn" onClick={() => onSnooze(s.ms)}
+              style={{ fontSize: 13, padding: "8px 14px", gap: 6 }}>
+              <Icon name="clock" size={14} />
+              {s.label}
+            </button>
+          ))}
+        </div>
+
+        <button className="btn btn-primary" onClick={onDismiss}
+          style={{ width: "100%", justifyContent: "center", fontSize: 14 }}>
+          Dispensar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+window.ReminderAlertModal = ReminderAlertModal;
+  </script>
+
+  <!-- topbar -->
+  <script type="text/babel">
+function TopBar({ state, onExport, onImport, onAddCard, filter, setFilter, search, setSearch }) {
+  const todayCalls = state.cards.reduce((acc, c) => {
+    const today = new Date().toDateString();
+    return acc + c.history.filter(h => new Date(h.ts).toDateString() === today).length;
+  }, 0);
+
+  const answered = state.cards.reduce((acc, c) => {
+    const today = new Date().toDateString();
+    return acc + c.history.filter(h => new Date(h.ts).toDateString() === today && h.outcome === "atendeu").length;
+  }, 0);
+
+  const interested = state.cards.filter(c => {
+    const last = c.history[c.history.length - 1];
+    return last?.outcome === "interessado";
+  }).length;
+
+  const pendingReminders = state.cards.filter(c => c.reminder && c.reminder.at).length;
+
+  const fileInputRef = useRef(null);
+
+  return (
+    <div style={{
+      background: "#fff",
+      borderBottom: "1px solid var(--line-soft)",
+      padding: "18px 40px",
+      display: "flex",
+      alignItems: "center",
+      gap: 24,
+      position: "sticky",
+      top: 0,
+      zIndex: 50,
+      backdropFilter: "blur(8px)",
+      backgroundColor: "rgba(255,255,255,0.92)",
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{
+          width: 38, height: 38, borderRadius: 12,
+          background: "linear-gradient(135deg, var(--lavender-bg), var(--sky-bg))",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          color: "var(--ink-1)",
+        }}>
+          <Icon name="phone" size={18} />
+        </div>
+        <div>
+          <div style={{ fontSize: 15, fontWeight: 600, letterSpacing: "-0.01em" }}>Chamadas Diárias</div>
+          <div style={{ fontSize: 12, color: "var(--ink-3)", marginTop: 1 }}>
+            {window.formatFullDatePT()}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: "flex", gap: 8, marginLeft: 16 }}>
+        <StatPill label="Chamadas hoje" value={todayCalls} tint="sky" />
+        <StatPill label="Atendidas" value={answered} tint="mint" />
+        <StatPill label="Interessados" value={interested} tint="lavender" />
+        {pendingReminders > 0 && <StatPill label="Lembretes" value={pendingReminders} tint="peach" />}
+      </div>
+
+      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 8,
+          padding: "8px 14px",
+          background: "var(--bg-sunk)",
+          borderRadius: 10,
+          width: 220,
+          border: "1px solid transparent",
+        }}>
+          <Icon name="search" size={14} style={{ color: "var(--ink-3)" }} />
+          <input
+            type="text"
+            placeholder="Procurar…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ background: "transparent", border: "none", outline: "none", flex: 1, fontSize: 13, color: "var(--ink-1)" }}
+          />
+        </div>
+
+        <button className="btn" onClick={() => fileInputRef.current?.click()} title="Importar backup">
+          <Icon name="import" size={15} />
+        </button>
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json"
+          style={{ display: "none" }}
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            if (f) onImport(f);
+            e.target.value = "";
+          }}
+        />
+        <button className="btn" onClick={onExport}>
+          <Icon name="export" size={15} />
+          Exportar
+        </button>
+        <button className="btn btn-primary" onClick={onAddCard}>
+          <Icon name="plus" size={15} />
+          Nova ficha
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function StatPill({ label, value, tint }) {
+  const dotVar = `var(--${tint}-dot)`;
+  return (
+    <div style={{
+      padding: "6px 12px 6px 10px",
+      borderRadius: 10,
+      background: "var(--bg-sunk)",
+      display: "flex", alignItems: "center", gap: 10,
+      fontSize: 12,
+    }}>
+      <span className="dot" style={{ background: dotVar }} />
+      <span style={{ color: "var(--ink-3)" }}>{label}</span>
+      <span style={{ fontWeight: 600, color: "var(--ink-1)", fontVariantNumeric: "tabular-nums" }}>{value}</span>
+    </div>
+  );
+}
+
+function FilterBar({ filter, setFilter, state }) {
+  const statusCounts = {};
+  state.cards.forEach(c => {
+    const last = c.history[c.history.length - 1];
+    const key = c.status || last?.outcome;
+    if (key) statusCounts[key] = (statusCounts[key] || 0) + 1;
+  });
+
+  const platformCounts = {};
+  state.cards.forEach(c => {
+    platformCounts[c.platform] = (platformCounts[c.platform] || 0) + 1;
+  });
+
+  const reminderCount = state.cards.filter(c => c.reminder && c.reminder.at).length;
+
+  return (
+    <div style={{ padding: "16px 40px 0", display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
+      <FilterGroup label="Estado">
+        <FilterChip active={filter.status === "all"} onClick={() => setFilter({ ...filter, status: "all" })} label="Tudo" count={state.cards.length} />
+        {window.OUTCOMES.map(o => {
+          const count = statusCounts[o.id] || 0;
+          if (!count) return null;
+          return (
+            <FilterChip
+              key={o.id}
+              active={filter.status === o.id}
+              onClick={() => setFilter({ ...filter, status: filter.status === o.id ? "all" : o.id })}
+              label={<><span>{o.emoji}</span><span>{o.label}</span></>}
+              count={count}
+              tint={o.tint}
+            />
+          );
+        })}
+      </FilterGroup>
+
+      <div style={{ width: 1, height: 20, background: "var(--line)" }} />
+
+      <FilterGroup label="Plataforma">
+        {window.PLATFORMS.map(p => {
+          const count = platformCounts[p.id] || 0;
+          if (!count) return null;
+          return (
+            <FilterChip
+              key={p.id}
+              active={filter.platform === p.id}
+              onClick={() => setFilter({ ...filter, platform: filter.platform === p.id ? "all" : p.id })}
+              label={p.label}
+              count={count}
+              tint={p.tint}
+            />
+          );
+        })}
+      </FilterGroup>
+
+      {reminderCount > 0 && (
+        <>
+          <div style={{ width: 1, height: 20, background: "var(--line)" }} />
+          <FilterChip
+            active={filter.reminder === true}
+            onClick={() => setFilter({ ...filter, reminder: !filter.reminder })}
+            label={<><Icon name="bell" size={12} /><span>Com lembrete</span></>}
+            count={reminderCount}
+            tint="peach"
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
+function FilterGroup({ label, children }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+      <span style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginRight: 4 }}>{label}</span>
+      {children}
+    </div>
+  );
+}
+
+function FilterChip({ active, onClick, label, count, tint }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        padding: "5px 10px",
+        borderRadius: 99,
+        background: active ? (tint ? `var(--${tint}-bg)` : "var(--ink-1)") : "transparent",
+        color: active ? (tint ? `var(--${tint}-fg)` : "#fff") : "var(--ink-2)",
+        border: `1px solid ${active ? "transparent" : "var(--line)"}`,
+        fontSize: 12,
+        fontWeight: 500,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        transition: "all 140ms ease",
+      }}
+    >
+      <span style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>{label}</span>
+      <span style={{
+        fontVariantNumeric: "tabular-nums",
+        fontSize: 11,
+        fontWeight: 600,
+        opacity: active ? 0.75 : 0.5,
+        padding: "0 4px",
+      }}>{count}</span>
+    </button>
+  );
+}
+
+window.TopBar = TopBar;
+window.FilterBar = FilterBar;
+  </script>
+
+
+  <!-- app -->
+  <script type="text/babel">
+// ============ Audio ============
+function playChime() {
+  const ctx = window._audioCtx;
+  if (!ctx) return;
+  const notes = [659.25, 783.99]; // E5, G5 — soft two-tone chime
+  notes.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = "sine";
+    osc.frequency.value = freq;
+    const t = ctx.currentTime + i * 0.22;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.15, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+    osc.start(t);
+    osc.stop(t + 0.65);
+  });
+}
+
+function App() {
+  const [state, setState] = useState({ cards: [] });
+  const [isLoading, setIsLoading] = useState(true);
+  const [saveStatus, setSaveStatus] = useState("saved"); // "saved" | "saving"
+  const [search, setSearch] = useState("");
+  const [filter, setFilter] = useState({ status: "all", platform: "all", reminder: false });
+  const [reminderFor, setReminderFor] = useState(null);
+  const [firedReminder, setFiredReminder] = useState(null);
+  const [collapsedIds, setCollapsedIds] = useState(new Set());
+  const stateRef = useRef(state);
+  const saveTimer = useRef(null);
+  const isFirstLoad = useRef(true);
+
+  const DENSITY = "balanced";
+  const OUTCOME_VARIANT = "white";
+  const STATUS_SET = "extended";
+
+  // Load from Supabase on mount
+  useEffect(() => {
+    window.loadState().then(loaded => {
+      setState(loaded);
+      stateRef.current = loaded;
+      setIsLoading(false);
+    });
+  }, []);
+
+  // Debounced save — waits 1.5s after last change before writing to Supabase
+  useEffect(() => {
+    stateRef.current = state;
+    if (isFirstLoad.current) { isFirstLoad.current = false; return; }
+    setSaveStatus("saving");
+    if (saveTimer.current) clearTimeout(saveTimer.current);
+    saveTimer.current = setTimeout(() => {
+      window.saveState(state).then(() => setSaveStatus("saved"));
+    }, 1500);
+    return () => clearTimeout(saveTimer.current);
+  }, [state]);
+
+  // Unlock audio on first interaction, then poll for fired reminders
+  useEffect(() => {
+    const unlock = () => {
+      if (!window._audioCtx) {
+        window._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+      document.removeEventListener("click", unlock, true);
+    };
+    document.addEventListener("click", unlock, true);
+
+    const iv = setInterval(() => {
+      const now = Date.now();
+      const fired = stateRef.current.cards.find(
+        c => c.reminder && c.reminder.at && c.reminder.at <= now
+      );
+      if (fired) {
+        setFiredReminder(prev => prev || fired);
+        playChime();
+        // Send SMS to friend
+        fetch("https://sms-reminder-1924.twil.io/welcome", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            body: `🔔 Lembrete: ${fired.reminder?.label || "tens uma chamada pendente"}${fired.seller ? " — " + fired.seller : ""}${fired.phone ? " (" + fired.phone + ")" : ""}`,
+          }),
+        }).catch(() => {}); // fail silently if SMS doesn't go through
+      }
+    }, 10_000);
+
+    return () => {
+      document.removeEventListener("click", unlock, true);
+      clearInterval(iv);
+    };
+  }, []);
+
+  const updateCard = (updated) => {
+    setState(s => ({ ...s, cards: s.cards.map(c => c.id === updated.id ? updated : c) }));
+  };
+  const deleteCard = (id) => {
+    if (!confirm("Eliminar esta ficha?")) return;
+    setState(s => ({ ...s, cards: s.cards.filter(c => c.id !== id) }));
+  };
+  const registerCall = (id) => {};
+  const requestReminder = (cardId, outcome) => {
+    setReminderFor({ cardId, outcome });
+  };
+  const confirmReminder = (reminder) => {
+    const cardId = reminderFor.cardId;
+    setState(s => ({
+      ...s,
+      cards: s.cards.map(c => c.id === cardId ? { ...c, reminder } : c),
+    }));
+    setReminderFor(null);
+  };
+
+  const addCard = () => {
+    const n = state.cards.length + 1;
+    const newCard = {
+      id: `c${Date.now()}`,
+      ref: "",
+      seller: "",
+      phone: "",
+      platform: "idealista",
+      listingUrl: "",
+      listingTitle: "",
+      notes: "",
+      history: [],
+      status: "pendente",
+      reminder: null,
+      createdAt: Date.now(),
+    };
+    setState(s => ({ ...s, cards: [newCard, ...s.cards] }));
+  };
+
+  const exportJSON = () => {
+    const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    const d = new Date().toISOString().split("T")[0];
+    a.download = `chamadas-${d}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const importJSON = (file) => {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const data = JSON.parse(e.target.result);
+        if (data.cards && Array.isArray(data.cards)) {
+          setState(data);
+        }
+      } catch (err) { alert("Ficheiro inválido"); }
+    };
+    reader.readAsText(file);
+  };
+
+  const filtered = state.cards.filter(c => {
+    if (search) {
+      const q = search.toLowerCase();
+      if (!(c.seller?.toLowerCase().includes(q) || c.phone?.includes(q) || c.ref?.toLowerCase().includes(q) || c.listingTitle?.toLowerCase().includes(q))) {
+        return false;
+      }
+    }
+    if (filter.platform !== "all" && c.platform !== filter.platform) return false;
+    if (filter.status !== "all") {
+      const last = c.history[c.history.length - 1];
+      const key = c.status || last?.outcome;
+      if (key !== filter.status) return false;
+    }
+    if (filter.reminder && !(c.reminder && c.reminder.at)) return false;
+    return true;
+  });
+
+  const toggleCollapse = (id) => {
+    setCollapsedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const isCollapsed = (id) => collapsedIds.has(id);
+
+  const allCollapsed = filtered.length > 0 && filtered.every(c => collapsedIds.has(c.id));
+
+  const toggleCollapseAll = () => {
+    if (allCollapsed) {
+      setCollapsedIds(prev => {
+        const next = new Set(prev);
+        filtered.forEach(c => next.delete(c.id));
+        return next;
+      });
+    } else {
+      setCollapsedIds(prev => {
+        const next = new Set(prev);
+        filtered.forEach(c => next.add(c.id));
+        return next;
+      });
+    }
+  };
+
+  if (isLoading) return (
+    <div style={{ minHeight: "100vh", background: "var(--bg)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 16 }}>
+      <div style={{ fontSize: 40 }}>📞</div>
+      <div style={{ fontSize: 16, fontWeight: 600, color: "var(--ink-2)" }}>A carregar as tuas fichas…</div>
+    </div>
+  );
+
+  return (
+    <div style={{ minHeight: "100vh", background: "var(--bg)", paddingBottom: 80 }}>
+      <div style={{
+        position: "fixed", bottom: 16, left: "50%", transform: "translateX(-50%)",
+        padding: "6px 14px", borderRadius: 99, fontSize: 12, fontWeight: 500,
+        background: saveStatus === "saving" ? "var(--butter-bg)" : "var(--mint-bg)",
+        color: saveStatus === "saving" ? "var(--butter-fg)" : "var(--mint-fg)",
+        transition: "all 400ms ease", zIndex: 90, pointerEvents: "none",
+      }}>
+        {saveStatus === "saving" ? "💾 A guardar…" : "✓ Guardado"}
+      </div>
+      <TopBar
+        state={state}
+        onExport={exportJSON}
+        onImport={importJSON}
+        onAddCard={addCard}
+        filter={filter}
+        setFilter={setFilter}
+        search={search}
+        setSearch={setSearch}
+      />
+      <FilterBar filter={filter} setFilter={setFilter} state={state} />
+
+      <div style={{ padding: "24px 40px 40px", maxWidth: 1280, margin: "0 auto", display: "flex", flexDirection: "column", gap: 18 }}>
+        {filtered.length > 0 && (
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button
+              onClick={toggleCollapseAll}
+              className="btn btn-ghost"
+              style={{ fontSize: 13, padding: "6px 12px", gap: 6 }}
+            >
+              <Icon name={allCollapsed ? "chevronDown" : "chevronUp"} size={14} />
+              {allCollapsed ? "Expandir todos" : "Colapsar todos"}
+            </button>
+          </div>
+        )}
+        {filtered.length === 0 ? (
+          <EmptyState onAdd={addCard} />
+        ) : (
+          filtered.map(card => (
+            <CallCard
+              key={card.id}
+              card={card}
+              onUpdate={updateCard}
+              onDelete={deleteCard}
+              onRegisterCall={registerCall}
+              onRequestReminder={requestReminder}
+              density={DENSITY}
+              outcomeVariant={OUTCOME_VARIANT}
+              statusSet={STATUS_SET}
+              collapsed={isCollapsed(card.id)}
+              onToggleCollapse={() => toggleCollapse(card.id)}
+            />
+          ))
+        )}
+
+        {filtered.length > 0 && (
+          <button
+            onClick={addCard}
+            style={{
+              border: "2px dashed var(--line)",
+              background: "transparent",
+              borderRadius: 20,
+              padding: "32px",
+              color: "var(--ink-3)",
+              fontSize: 14,
+              fontWeight: 500,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 10,
+              transition: "all 180ms ease",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--lavender-dot)"; e.currentTarget.style.color = "var(--lavender-fg)"; e.currentTarget.style.background = "var(--lavender-bg)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.borderColor = "var(--line)"; e.currentTarget.style.color = "var(--ink-3)"; e.currentTarget.style.background = "transparent"; }}
+          >
+            <Icon name="plus" />
+            Adicionar nova ficha
+          </button>
+        )}
+      </div>
+
+      {reminderFor && (
+        <ReminderModal
+          outcome={reminderFor.outcome}
+          onConfirm={confirmReminder}
+          onClose={() => setReminderFor(null)}
+        />
+      )}
+
+      {firedReminder && (
+        <ReminderAlertModal
+          card={firedReminder}
+          onDismiss={() => {
+            updateCard({ ...firedReminder, reminder: null });
+            setFiredReminder(null);
+          }}
+          onSnooze={(ms) => {
+            updateCard({ ...firedReminder, reminder: { at: Date.now() + ms, label: firedReminder.reminder?.label || "Lembrete" } });
+            setFiredReminder(null);
+          }}
+        />
+      )}
+
+    </div>
+  );
+}
+
+function EmptyState({ onAdd }) {
+  return (
+    <div style={{
+      padding: "80px 40px",
+      textAlign: "center",
+      background: "#fff",
+      borderRadius: 20,
+      border: "1px solid var(--line-soft)",
+    }}>
+      <div style={{
+        width: 64, height: 64, borderRadius: 20,
+        background: "linear-gradient(135deg, var(--lavender-bg), var(--sky-bg))",
+        display: "inline-flex", alignItems: "center", justifyContent: "center",
+        marginBottom: 20,
+      }}>
+        <Icon name="phone" size={26} />
+      </div>
+      <div style={{ fontSize: 18, fontWeight: 600, marginBottom: 6 }}>Sem resultados</div>
+      <div style={{ fontSize: 14, color: "var(--ink-3)", marginBottom: 20 }}>Ajuste os filtros ou adicione uma nova ficha.</div>
+      <button className="btn btn-primary" onClick={onAdd}>
+        <Icon name="plus" size={15} />
+        Nova ficha
+      </button>
+    </div>
+  );
+}
+
+function PasswordGate({ children }) {
+  const [unlocked, setUnlocked] = useState(
+    () => sessionStorage.getItem("cd-auth") === "ok"
+  );
+  const [input, setInput] = useState("");
+  const [error, setError] = useState(false);
+
+  const attempt = () => {
+    if (input === "vanda") {
+      sessionStorage.setItem("cd-auth", "ok");
+      setUnlocked(true);
+    } else {
+      setError(true);
+      setInput("");
+      setTimeout(() => setError(false), 1800);
+    }
+  };
+
+  if (unlocked) return children;
+
+  return (
+    <div style={{
+      minHeight: "100vh", background: "var(--bg)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }}>
+      <div style={{
+        background: "#fff", borderRadius: 24, padding: "40px 48px",
+        boxShadow: "var(--shadow-pop)", textAlign: "center", width: 360,
+        border: error ? "2px solid var(--blush-dot)" : "1px solid var(--line-soft)",
+        transition: "border 200ms ease",
+      }}>
+        <div style={{ fontSize: 40, marginBottom: 12 }}>📞</div>
+        <div style={{ fontSize: 20, fontWeight: 700, marginBottom: 6 }}>Chamadas Diárias</div>
+        <div style={{ fontSize: 13, color: "var(--ink-3)", marginBottom: 28 }}>
+          Introduz a senha para entrar
+        </div>
+        <input
+          type="password"
+          value={input}
+          placeholder="Senha"
+          autoFocus
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => e.key === "Enter" && attempt()}
+          style={{
+            width: "100%", padding: "12px 16px", borderRadius: 12,
+            border: `1px solid ${error ? "var(--blush-dot)" : "var(--line)"}`,
+            fontSize: 15, outline: "none", marginBottom: 12,
+            background: error ? "color-mix(in oklab, var(--blush-bg) 40%, #fff)" : "#fff",
+            transition: "all 200ms ease", textAlign: "center", letterSpacing: "0.1em",
+          }}
+        />
+        {error && (
+          <div style={{ fontSize: 13, color: "var(--blush-fg)", marginBottom: 10, fontWeight: 500 }}>
+            Senha incorrecta, tenta outra vez 🙈
+          </div>
+        )}
+        <button
+          className="btn btn-primary"
+          onClick={attempt}
+          style={{ width: "100%", justifyContent: "center", fontSize: 15, borderRadius: 14 }}
+        >
+          Entrar
+        </button>
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <PasswordGate><App /></PasswordGate>
+);
+  </script>
+</body>
+</html>
