@@ -385,6 +385,9 @@ const OUTCOMES = [
   { id: "ja_vendido",      emoji: "🏁", label: "Já vendido",        tint: "sand",     dot: "oklch(0.6 0.02 75)",  reminder: false },
   { id: "nao_interessado", emoji: "🚫", label: "Não interessado",   tint: "blush",    dot: "var(--blush-dot)",    reminder: false },
   { id: "interessado",     emoji: "🌟", label: "Interessado",       tint: "lavender", dot: "var(--lavender-dot)", reminder: true  },
+  { id: "whatsapp",        emoji: "💬", label: "WhatsApp",          tint: "mint",     dot: "var(--mint-dot)",     reminder: false,
+    svg: `<svg width="14" height="14" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd"><g transform="translate(-700,-360)" fill="#67C15E"><path d="M723.993033,360 C710.762252,360 700,370.765287 700,383.999801 C700,389.248451 701.692661,394.116025 704.570026,398.066947 L701.579605,406.983798 L710.804449,404.035539 C714.598605,406.546975 719.126434,408 724.006967,408 C737.237748,408 748,397.234315 748,384.000199 C748,370.765685 737.237748,360.000398 724.006967,360.000398 L723.993033,360.000398 L723.993033,360 Z M717.29285,372.190836 C716.827488,371.07628 716.474784,371.034071 715.769774,371.005401 C715.529728,370.991464 715.262214,370.977527 714.96564,370.977527 C714.04845,370.977527 713.089462,371.245514 712.511043,371.838033 C711.806033,372.557577 710.056843,374.23638 710.056843,377.679202 C710.056843,381.122023 712.567571,384.451756 712.905944,384.917648 C713.258648,385.382743 717.800808,392.55031 724.853297,395.471492 C730.368379,397.757149 732.00491,397.545307 733.260074,397.27732 C735.093658,396.882308 737.393002,395.527239 737.971421,393.891043 C738.54984,392.25405 738.54984,390.857171 738.380255,390.560912 C738.211068,390.264652 737.745308,390.095816 737.040298,389.742615 C736.335288,389.389811 732.90737,387.696673 732.25849,387.470894 C731.623543,387.231179 731.017259,387.315995 730.537963,387.99333 C729.860819,388.938653 729.198006,389.89831 728.661785,390.476494 C728.238619,390.928051 727.547144,390.984595 726.969123,390.744481 C726.193254,390.420348 724.021298,389.657798 721.340985,387.273388 C719.267356,385.42535 717.856938,383.125756 717.448104,382.434484 C717.038871,381.729275 717.405907,381.319529 717.729948,380.938852 C718.082653,380.501232 718.421026,380.191036 718.77373,379.781688 C719.126434,379.372738 719.323884,379.160897 719.549599,378.681068 C719.789645,378.215575 719.62006,377.735746 719.450874,377.382942 C719.281687,377.030139 717.871269,373.587317 717.29285,372.190836 Z"/></g></g></svg>`
+  },
 ];
 const OUTCOMES_BY_ID = Object.fromEntries(OUTCOMES.map(o => [o.id, o]));
 
@@ -650,6 +653,19 @@ function StatusBadge({ status, statusSet }) {
   );
 }
 
+function OutcomeIcon({ outcome, size = 14 }) {
+  if (outcome.svg) {
+    return (
+      <span
+        className="emoji"
+        style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: size, height: size }}
+        dangerouslySetInnerHTML={{ __html: outcome.svg }}
+      />
+    );
+  }
+  return <span className="emoji">{outcome.emoji}</span>;
+}
+
 function OutcomeButton({ outcome, variant, active, onClick }) {
   if (variant === "white") {
     return (
@@ -662,7 +678,7 @@ function OutcomeButton({ outcome, variant, active, onClick }) {
           border: `1px solid ${active ? "transparent" : "var(--line)"}`,
         }}
       >
-        <span className="emoji">{outcome.emoji}</span>
+        <OutcomeIcon outcome={outcome} size={14} />
         <span>{outcome.label}</span>
       </button>
     );
@@ -675,7 +691,7 @@ function OutcomeButton({ outcome, variant, active, onClick }) {
         title={outcome.label}
         style={{ padding: "10px", fontSize: 16 }}
       >
-        <span className="emoji">{outcome.emoji}</span>
+        <OutcomeIcon outcome={outcome} size={16} />
       </button>
     );
   }
@@ -684,7 +700,7 @@ function OutcomeButton({ outcome, variant, active, onClick }) {
       className={`outcome tint-${outcome.tint} ${active ? "active" : ""}`}
       onClick={onClick}
     >
-      <span className="emoji">{outcome.emoji}</span>
+      <OutcomeIcon outcome={outcome} size={14} />
       <span>{outcome.label}</span>
     </button>
   );
@@ -755,7 +771,7 @@ function CallCard({
         </div>
         {lastOutcomeObj && (
           <div className={`chip tint-subtle-${lastOutcomeObj.tint}`}>
-            <span>{lastOutcomeObj.emoji}</span>
+            <window.OutcomeIcon outcome={lastOutcomeObj} size={13} />
             <span>{lastOutcomeObj.label}</span>
           </div>
         )}
@@ -876,17 +892,72 @@ function CallCard({
                   placeholder="https://…"
                   style={{ fontSize: 13 }}
                 />
-                {card.listingUrl && (
-                  <a
-                    href={card.listingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ display: "flex", flexShrink: 0, color: "var(--sky-fg)" }}
-                    title="Abrir anúncio"
-                  >
-                    <Icon name="externalLink" size={14} />
-                  </a>
-                )}
+                {card.listingUrl && (() => {
+                  const [copied, setCopied] = React.useState(false);
+                  const [hovered, setHovered] = React.useState(false);
+                  const handleCopy = () => {
+                    navigator.clipboard.writeText(card.listingUrl).then(() => {
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    });
+                  };
+                  return (
+                    <>
+                      <div style={{ position: "relative", display: "flex", flexShrink: 0 }}>
+                        <button
+                          onClick={handleCopy}
+                          onMouseEnter={() => setHovered(true)}
+                          onMouseLeave={() => setHovered(false)}
+                          style={{ display: "flex", background: "none", border: "none", cursor: "pointer", padding: 0, color: copied ? "var(--mint-fg)" : "var(--ink-3)" }}
+                        >
+                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                            {copied
+                              ? <><polyline points="20 6 9 17 4 12"/></>
+                              : <><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></>
+                            }
+                          </svg>
+                        </button>
+                        {(hovered || copied) && (
+                          <div style={{
+                            position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)",
+                            background: "var(--ink-1)", color: "#fff", fontSize: 11, fontWeight: 500,
+                            padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap", pointerEvents: "none",
+                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+                          }}>
+                            {copied ? "Copiado!" : "Copiar"}
+                          </div>
+                        )}
+                      </div>
+                      {(() => {
+                        const [hoveredLink, setHoveredLink] = React.useState(false);
+                        return (
+                          <div style={{ position: "relative", display: "flex", flexShrink: 0 }}>
+                            <a
+                              href={card.listingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onMouseEnter={() => setHoveredLink(true)}
+                              onMouseLeave={() => setHoveredLink(false)}
+                              style={{ display: "flex", color: "var(--sky-fg)" }}
+                            >
+                              <Icon name="externalLink" size={14} />
+                            </a>
+                            {hoveredLink && (
+                              <div style={{
+                                position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)",
+                                background: "var(--ink-1)", color: "#fff", fontSize: 11, fontWeight: 500,
+                                padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap", pointerEvents: "none",
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+                              }}>
+                                Ver link
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })()}
+                    </>
+                  );
+                })()}
               </div>
             </FieldRow>
           </div>
@@ -1016,7 +1087,7 @@ function CallCard({
                     const o = window.OUTCOMES_BY_ID[h.outcome];
                     return (
                       <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, padding: "4px 2px" }}>
-                        <span style={{ fontSize: 14, width: 18, textAlign: "center" }}>{o?.emoji || "·"}</span>
+                        <span style={{ fontSize: 14, width: 18, textAlign: "center", display: "inline-flex", alignItems: "center" }}>{o ? <window.OutcomeIcon outcome={o} size={14} /> : "·"}</span>
                         <span style={{ flex: 1, color: "var(--ink-2)", fontWeight: 500 }}>{o?.label || h.outcome}</span>
                         <span style={{ color: "var(--ink-4)", fontVariantNumeric: "tabular-nums" }}>{window.formatDateTime(h.ts)}</span>
                       </div>
@@ -1035,6 +1106,7 @@ function CallCard({
 window.CallCard = CallCard;
 window.StatusBadge = StatusBadge;
 window.OutcomeButton = OutcomeButton;
+window.OutcomeIcon = OutcomeIcon;
 window.FieldRow = FieldRow;
 window.InlineEdit = InlineEdit;
   </script>
@@ -1064,7 +1136,7 @@ function ReminderModal({ outcome, onConfirm, onClose }) {
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 4 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
             <div className={`squircle-icon tint-${outcome.tint}`} style={{ width: 44, height: 44, borderRadius: 14, border: "none" }}>
-              <span style={{ fontSize: 20 }}>{outcome.emoji}</span>
+              <window.OutcomeIcon outcome={outcome} size={20} />
             </div>
             <div>
               <div style={{ fontSize: 18, fontWeight: 600, letterSpacing: "-0.01em" }}>Definir lembrete</div>
@@ -1338,7 +1410,7 @@ function FilterBar({ filter, setFilter, state }) {
               key={o.id}
               active={filter.status === o.id}
               onClick={() => setFilter({ ...filter, status: filter.status === o.id ? "all" : o.id })}
-              label={<><span>{o.emoji}</span><span>{o.label}</span></>}
+              label={<><window.OutcomeIcon outcome={o} size={13} /><span>{o.label}</span></>}
               count={count}
               tint={o.tint}
             />
