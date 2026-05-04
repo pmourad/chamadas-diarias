@@ -4,6 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Chamadas Diárias</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📞</text></svg>" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://cdn.jsdelivr.net/npm/@fontsource/geist@5.0.1/400.css" rel="stylesheet" />
@@ -169,6 +170,7 @@ textarea { resize: none; }
   color: var(--ink-2);
 }
 .btn-ghost:hover { background: var(--bg-sunk); color: var(--ink-1); }
+.collapse-caret-mobile { display: none; }
 .btn-lembrete { display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; font-size: 13px; font-weight: 500; border: 1px solid var(--ink-1); border-radius: 12px; background: transparent; color: var(--ink-2); cursor: pointer; white-space: nowrap; align-self: flex-start; transition: background 0.15s, color 0.15s; }
 .btn-lembrete:hover { background: var(--ink-1); color: #fff; }
 
@@ -325,6 +327,55 @@ textarea { resize: none; }
 :focus-visible {
   outline: none;
   box-shadow: 0 0 0 3px oklch(0.94 0.055 230 / 0.6);
+}
+
+/* ============ Card layout grids ============ */
+.card-panels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1.4fr);
+  min-height: 280px;
+}
+.card-bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 4px;
+  min-height: 120px;
+}
+
+/* ============ Responsive ============ */
+@media (max-width: 640px) {
+  /* Topbar */
+  .topbar { padding: 12px 16px !important; flex-wrap: wrap; gap: 10px !important; }
+  .topbar-logo { flex-shrink: 0; }
+  .topbar-stats { display: none !important; }
+  .topbar-actions { margin-left: 0 !important; width: 100%; flex-direction: column; gap: 8px !important; }
+  .topbar-search { width: 100% !important; flex: unset; }
+  .topbar-actions .btn-primary { width: 100%; justify-content: center; }
+  .topbar-export { display: none !important; }
+  .topbar-import { display: none !important; }
+
+  /* Filter bar */
+  .filterbar { padding: 12px 16px 0 !important; overflow-x: auto; flex-wrap: nowrap !important; gap: 10px !important; }
+  .filterbar > * { flex-shrink: 0; }
+
+  /* Cards */
+  .cards-wrap { padding: 16px !important; gap: 24px !important; }
+  .card-panels { grid-template-columns: 1fr !important; min-height: unset !important; }
+  .card-panels .divider-v { display: none; }
+  .card-bottom-grid { grid-template-columns: 1fr !important; min-height: unset !important; }
+
+  /* Modal */
+  .modal { min-width: unset !important; width: calc(100vw - 32px) !important; padding: 20px !important; }
+
+  /* Registar chamada row */
+  .register-row { flex-wrap: wrap; }
+  .register-row .btn-primary { width: 100%; flex: unset !important; }
+  .collapse-caret-desktop { display: none !important; }
+  .collapse-caret-mobile { display: inline-flex; }
+
+  /* Collapse bar */
+  .collapse-bar { padding: 8px 16px !important; }
 }
   </style>
 </head>
@@ -723,6 +774,74 @@ function FieldRow({ icon, label, children }) {
   );
 }
 
+function CopyButton({ url }) {
+  const [copied, setCopied] = React.useState(false);
+  const [hovered, setHovered] = React.useState(false);
+  if (!url) return null;
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
+  return (
+    <div style={{ position: "relative", display: "flex", flexShrink: 0 }}>
+      <button
+        onClick={handleCopy}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{ display: "flex", background: "none", border: "none", cursor: "pointer", padding: 0, color: copied ? "var(--mint-fg)" : "var(--ink-3)" }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          {copied
+            ? <polyline points="20 6 9 17 4 12"/>
+            : <><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></>
+          }
+        </svg>
+      </button>
+      {(hovered || copied) && (
+        <div style={{
+          position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)",
+          background: "var(--ink-1)", color: "#fff", fontSize: 11, fontWeight: 500,
+          padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap", pointerEvents: "none",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+        }}>
+          {copied ? "Copiado!" : "Copiar"}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function ViewLinkButton({ url }) {
+  const [hovered, setHovered] = React.useState(false);
+  if (!url) return null;
+  return (
+    <div style={{ position: "relative", display: "flex", flexShrink: 0 }}>
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        style={{ display: "flex", color: "var(--sky-fg)" }}
+      >
+        <Icon name="externalLink" size={14} />
+      </a>
+      {hovered && (
+        <div style={{
+          position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)",
+          background: "var(--ink-1)", color: "#fff", fontSize: 11, fontWeight: 500,
+          padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap", pointerEvents: "none",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
+        }}>
+          Ver link
+        </div>
+      )}
+    </div>
+  );
+}
+
 function CallCard({
   card,
   onUpdate,
@@ -812,7 +931,7 @@ function CallCard({
         <StatusBadge status={card.status || lastOutcome} statusSet={statusSet} />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 1px minmax(0, 1.4fr)", minHeight: 280 }}>
+      <div className="card-panels">
         {/* LEFT PANEL */}
         <div style={{ padding: `${pad}px`, display: "flex", flexDirection: "column", gap: density === "compact" ? 14 : 18 }}>
           <div style={{ paddingRight: 90, display: "flex", flexDirection: "column", gap: 6 }}>
@@ -881,72 +1000,8 @@ function CallCard({
                   placeholder="https://…"
                   style={{ fontSize: 13 }}
                 />
-                {card.listingUrl && (() => {
-                  const [copied, setCopied] = React.useState(false);
-                  const [hovered, setHovered] = React.useState(false);
-                  const handleCopy = () => {
-                    navigator.clipboard.writeText(card.listingUrl).then(() => {
-                      setCopied(true);
-                      setTimeout(() => setCopied(false), 2000);
-                    });
-                  };
-                  return (
-                    <>
-                      <div style={{ position: "relative", display: "flex", flexShrink: 0 }}>
-                        <button
-                          onClick={handleCopy}
-                          onMouseEnter={() => setHovered(true)}
-                          onMouseLeave={() => setHovered(false)}
-                          style={{ display: "flex", background: "none", border: "none", cursor: "pointer", padding: 0, color: copied ? "var(--mint-fg)" : "var(--ink-3)" }}
-                        >
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-                            {copied
-                              ? <><polyline points="20 6 9 17 4 12"/></>
-                              : <><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></>
-                            }
-                          </svg>
-                        </button>
-                        {(hovered || copied) && (
-                          <div style={{
-                            position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)",
-                            background: "var(--ink-1)", color: "#fff", fontSize: 11, fontWeight: 500,
-                            padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap", pointerEvents: "none",
-                            boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
-                          }}>
-                            {copied ? "Copiado!" : "Copiar"}
-                          </div>
-                        )}
-                      </div>
-                      {(() => {
-                        const [hoveredLink, setHoveredLink] = React.useState(false);
-                        return (
-                          <div style={{ position: "relative", display: "flex", flexShrink: 0 }}>
-                            <a
-                              href={card.listingUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onMouseEnter={() => setHoveredLink(true)}
-                              onMouseLeave={() => setHoveredLink(false)}
-                              style={{ display: "flex", color: "var(--sky-fg)" }}
-                            >
-                              <Icon name="externalLink" size={14} />
-                            </a>
-                            {hoveredLink && (
-                              <div style={{
-                                position: "absolute", bottom: "calc(100% + 6px)", left: "50%", transform: "translateX(-50%)",
-                                background: "var(--ink-1)", color: "#fff", fontSize: 11, fontWeight: 500,
-                                padding: "3px 8px", borderRadius: 6, whiteSpace: "nowrap", pointerEvents: "none",
-                                boxShadow: "0 2px 8px rgba(0,0,0,0.15)"
-                              }}>
-                                Ver link
-                              </div>
-                            )}
-                          </div>
-                        );
-                      })()}
-                    </>
-                  );
-                })()}
+                <CopyButton url={card.listingUrl} />
+                <ViewLinkButton url={card.listingUrl} />
               </div>
             </FieldRow>
           </div>
@@ -1015,7 +1070,7 @@ function CallCard({
 
         {/* RIGHT PANEL */}
         <div style={{ padding: `${pad}px`, display: "flex", flexDirection: "column", gap: density === "compact" ? 14 : 18 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <div className="register-row" style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button
               className="btn btn-primary"
               onClick={handleRegister}
@@ -1025,12 +1080,20 @@ function CallCard({
               Registar chamada
             </button>
             <button
-              className="btn btn-ghost"
+              className="btn btn-ghost collapse-caret-desktop"
               onClick={onToggleCollapse}
               title="Colapsar"
               style={{ padding: 10 }}
             >
               <Icon name="chevronUp" size={16} />
+            </button>
+            <button
+              className="btn btn-ghost collapse-caret-mobile"
+              onClick={onToggleCollapse}
+              style={{ width: "100%", justifyContent: "center", fontSize: 12, color: "var(--ink-3)", padding: "4px 0", gap: 4 }}
+            >
+              <Icon name="chevronUp" size={13} />
+              Colapsar
             </button>
           </div>
 
@@ -1057,7 +1120,7 @@ function CallCard({
             </div>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 4, minHeight: 120 }}>
+          <div className="card-bottom-grid">
             <div style={{ display: "flex", flexDirection: "column", minHeight: 0 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: "var(--ink-3)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>Notas</div>
               <textarea
@@ -1302,7 +1365,7 @@ function TopBar({ state, onExport, onImport, onAddCard, filter, setFilter, searc
   const fileInputRef = useRef(null);
 
   return (
-    <div style={{
+    <div className="topbar" style={{
       background: "#fff",
       borderBottom: "1px solid var(--line-soft)",
       padding: "18px 40px",
@@ -1332,15 +1395,15 @@ function TopBar({ state, onExport, onImport, onAddCard, filter, setFilter, searc
         </div>
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginLeft: 16 }}>
+      <div className="topbar-stats" style={{ display: "flex", gap: 8, marginLeft: 16 }}>
         <StatPill label="Chamadas hoje" value={todayCalls} tint="sky" />
         <StatPill label="Atendidas" value={answered} tint="mint" />
         <StatPill label="Interessados" value={interested} tint="lavender" />
         {pendingReminders > 0 && <StatPill label="Lembretes" value={pendingReminders} tint="peach" />}
       </div>
 
-      <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
-        <div style={{
+      <div className="topbar-actions" style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 10 }}>
+        <div className="topbar-search" style={{
           display: "flex", alignItems: "center", gap: 8,
           padding: "8px 14px",
           background: "var(--bg-sunk)",
@@ -1358,7 +1421,7 @@ function TopBar({ state, onExport, onImport, onAddCard, filter, setFilter, searc
           />
         </div>
 
-        <button className="btn" onClick={() => fileInputRef.current?.click()} title="Importar backup">
+        <button className="btn topbar-import" onClick={() => fileInputRef.current?.click()} title="Importar backup">
           <Icon name="import" size={15} />
         </button>
         <input
@@ -1372,7 +1435,7 @@ function TopBar({ state, onExport, onImport, onAddCard, filter, setFilter, searc
             e.target.value = "";
           }}
         />
-        <button className="btn" onClick={onExport}>
+        <button className="btn topbar-export" onClick={onExport}>
           <Icon name="export" size={15} />
           Exportar
         </button>
@@ -1418,7 +1481,7 @@ function FilterBar({ filter, setFilter, state }) {
   const reminderCount = state.cards.filter(c => c.reminder && c.reminder.at).length;
 
   return (
-    <div style={{ padding: "16px 40px 0", display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
+    <div className="filterbar" style={{ padding: "16px 40px 0", display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
       <FilterGroup label="Estado">
         <FilterChip active={filter.status === "all"} onClick={() => setFilter({ ...filter, status: "all" })} label="Tudo" count={state.cards.length} />
         {window.OUTCOMES.map(o => {
@@ -1750,7 +1813,7 @@ function App() {
       />
       <FilterBar filter={filter} setFilter={setFilter} state={state} />
 
-      <div style={{ padding: "24px 40px 40px", maxWidth: 1280, margin: "0 auto", display: "flex", flexDirection: "column", gap: 18 }}>
+      <div className="cards-wrap" style={{ padding: "24px 40px 40px", maxWidth: 1280, margin: "0 auto", display: "flex", flexDirection: "column", gap: 18 }}>
         {filtered.length > 0 && (
           <div style={{ display: "flex", justifyContent: "flex-end" }}>
             <button
